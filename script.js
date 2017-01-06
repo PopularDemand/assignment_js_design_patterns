@@ -1,14 +1,31 @@
 CardMatcher = {};
 
+function Card(data, id) {
+  this.data = data;
+  this.id = id;
+
+  this.asTd = function() {
+    return $('<td>').attr({class: 'card', "data-id": id}).text(data);
+  }
+}
+
 CardMatcher.Model = {
 
+  cards: [],
+
   generateCards: function(numCards) {
-    var cards = [];
     for(i = 0; i < numCards; i++) {
       this.cards.push(i);
     }
-    return cards;
+  },
+
+  getCards: function(numCards) {
+    if (numCards){
+      this.generateCards(numCards);
+    }
+    return this.cards;
   }
+
 };
 
 CardMatcher.View = {
@@ -25,22 +42,42 @@ CardMatcher.View = {
 
   initialDisplay: function(cards) {
     var twiceCards = [];
+    var rowLength = 5;
+
+    // duplicate "cards"
     $.each(cards, function(i, card){
       twiceCards.push(card);
       twiceCards.push(card);
     });
-    twiceCards = this._shuffle(twiceCards);
-    $.map(twiceCards, function(card, i){
-      $("<td>").addClass("card").text(card);
-    })
-    var rowLength = 5;
-    for(var i = 0; i < twiceCards.length; i++) {
 
+    // shuffle the "cards"
+    twiceCards = this._shuffle(twiceCards);
+
+    // turn data into actual cards
+    $.map(twiceCards, function(card, i){
+      return new Card(card, i);
+    })
+
+    //make table row
+    var $tr = $('<tr>');
+
+    // Set grid
+    for(var i = 1; i <= twiceCards.length; i++) {
+
+      // add card to row
+      $tr.append(twiceCards[i-1].asTd);
+
+      // if the card row length % card id = 0, 
+      // append row to table, make new row
+      if (rowLength % i === 0) {
+        $('#card-grid').append($tr);
+        $tr = ('<tr>');
+      }
     }
     // << $td's onto $tr's, 4 per row (%)
   },
 
-  _shuffle: function(arr) {
+  _shuffle: function(array) {
     var currentIndex = array.length, temporaryValue, randomIndex;
     // While there remain elements to shuffle...
     while (0 !== currentIndex) {
@@ -60,7 +97,11 @@ CardMatcher.View = {
 CardMatcher.Controller = {
   init: function() {
     var numCards = CardMatcher.View.getNumCards();
-    var cards = CardMatcher.Model.generateCards(numCards);
+    var cards = CardMatcher.Model.getCards(numCards);
     CardMatcher.View.initialDisplay(cards);
   }
 };
+
+$(document).ready(function() {
+  CardMatcher.Controller.init();
+})
