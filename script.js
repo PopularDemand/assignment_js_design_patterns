@@ -9,6 +9,8 @@ function Card(data, id) {
   }
 }
 
+$td = $('<td>')
+
 CardMatcher.Model = {
 
   cards: [],
@@ -54,24 +56,25 @@ CardMatcher.View = {
     twiceCards = this._shuffle(twiceCards);
 
     // turn data into actual cards
-    $.map(twiceCards, function(card, i){
+    twiceCards = $.map(twiceCards, function(card, i){
       return new Card(card, i);
     })
 
     //make table row
-    var $tr = $('<tr>');
+    var $tr = $('<tr/>');
 
     // Set grid
     for(var i = 1; i <= twiceCards.length; i++) {
 
       // add card to row
-      $tr.append(twiceCards[i-1].asTd);
-
+      var $td = twiceCards[i-1].asTd;
+      $tr.append($td);
       // if the card row length % card id = 0, 
       // append row to table, make new row
-      if (rowLength % i === 0) {
+      if (5 % i === 0) {
+        console.log($tr)
         $('#card-grid').append($tr);
-        $tr = ('<tr>');
+        $tr = $('<tr>');
       }
     }
     // << $td's onto $tr's, 4 per row (%)
